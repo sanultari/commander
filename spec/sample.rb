@@ -25,12 +25,17 @@ end
 class Runner
   include SanUltari::Command
 
+  default :hello
+
   map :hello, Hello, desc: 'hello command'
+  desc :hello, 'hello'
   # type: :attribute is default
-  param :hello, :name, require: false, default: 'World'
+  param :hello, :name, require: true, default: 'World'
   # second parameter is optional. second parameter can remove for importing all commands
   import AnotherRunner, :bye
   # another importing method. imported commands has group. commands having same name can be distinguish
   # last optional parameter is same functionally with above method
   group :say, AnotherRunner
 end
+
+Runner.run ARGV
