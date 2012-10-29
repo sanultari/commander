@@ -36,6 +36,7 @@ module SanUltari::Command
     def run argv
       selected_command = nil
       argv.each do |arg|
+        # TODO options parsing?
         unless arg.start_with? '-'
           selected_command = @registry[arg.to_sym]
           break

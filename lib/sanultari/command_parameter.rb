@@ -1,4 +1,4 @@
-class CommandParameter
+class SanUltari::CommandParameter
   attr_reader :name, :default, :type
 
   def initialize name, options = nil

@@ -15,7 +15,7 @@ class SanUltari::CommandRunner
   end
 
   def add_param param_name, options
-    param = CommandParameter.new(param_name, options)
+    param = SanUltari::CommandParameter.new(param_name, options)
     if param.require? && !param.default
       @required_param_count += 1
     end
@@ -52,6 +52,7 @@ class SanUltari::CommandRunner
 
     runner = @clazz.new
 
+    # TODO options parsing
     @params.each do |param_config|
       value = args.shift
 
