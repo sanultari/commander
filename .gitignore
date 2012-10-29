@@ -40,10 +40,13 @@ pkg
 #.\#*
 
 # For vim:
-#*.swp
+*.swp
+*.bak
 
 # For redcar:
 #.redcar
 
 # For rubinius:
 #*.rbc
+.idea
+pkg/
