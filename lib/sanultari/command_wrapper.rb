@@ -38,8 +38,9 @@ class SanUltari::CommandWrapper
     @freeze = true
   end
 
-  def run args = nil
+  def run args = nil, options = nil
     args ||= []
+    options ||= []
     trim_index = args.index(@name.to_s)
     trim_index ||= -1
     trim_index += 1
@@ -53,19 +54,37 @@ class SanUltari::CommandWrapper
     runner = @clazz.new
 
     # TODO options parsing
-    @params.each do |param_config|
-      value = args.shift
+    param_configs = @params.clone
+    args.each do |arg|
+      if param_configs.empty?
+        index = args.index arg
+        options += args[index..-1]
+        break
+      end
 
-      value ||= param_config.default
+      current_param_config = param_configs[0]
+      if arg.start_with? '-'
+        options.push arg
+        next
+      end
+
+      # set params
+      runner.public_send "#{current_param_config.name}=".to_sym, value
+      param_configs.shift
+    end
+
+    param_configs.each do |param_config|
+      value = param_config.default
 
       if param_config.require? && !value
         puts "required parameter(#{param_config.name}) is missing"
         return
       end
 
-      # set params
       runner.public_send "#{param_config.name}=".to_sym, value
+      param_configs.shift
     end
+
     runner.public_send @name
   end
 end

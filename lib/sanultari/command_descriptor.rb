@@ -1,4 +1,4 @@
-require 'sanultari/command_runner'
+require 'sanultari/command_wrapper'
 
 module SanUltari::CommandDescriptor
   def self.included target
@@ -46,8 +46,14 @@ module SanUltari::CommandDescriptor
         end
       end
 
+      args = argv
+      if selected_command == nil
+        args += options
+        options.clear
+      end
+
       selected_command ||= @registry[@default_command] unless @default_command == nil
-      selected_command.run(argv, options) if selected_command != nil
+      selected_command.run(args, options) if selected_command != nil
     end
   end
 end
