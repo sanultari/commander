@@ -1,6 +1,6 @@
 require 'sanultari/command_parameter'
 
-class SanUltari::CommandRunner
+class SanUltari::CommandWrapper
   attr_reader :clazz, :params, :options
 
   def initialize name, clazz, params = nil, options = nil

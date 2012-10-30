@@ -15,7 +15,7 @@ class Goodbye
 end
 
 class AnotherRunner
-  include SanUltari::Command
+  include SanUltari::CommandDescriptor
 
   #, desc: 'goodbye command'
   map :bye, Goodbye
@@ -23,7 +23,7 @@ class AnotherRunner
 end
 
 class Runner
-  include SanUltari::Command
+  include SanUltari::CommandDescriptor
 
   default :hello
 

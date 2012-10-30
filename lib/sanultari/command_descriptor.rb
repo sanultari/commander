@@ -1,6 +1,6 @@
 require 'sanultari/command_runner'
 
-module SanUltari::Command
+module SanUltari::CommandDescriptor
   def self.included target
     target.extend ClassMethods
   end
@@ -10,7 +10,7 @@ module SanUltari::Command
 
     def map command, clazz, options = nil
       @registry ||= {}
-      @registry[command.to_sym] = SanUltari::CommandRunner.new command, clazz, nil, options
+      @registry[command.to_sym] = SanUltari::CommandWrapper.new command, clazz, nil, options
     end
 
     def desc command, description
@@ -35,16 +35,19 @@ module SanUltari::Command
 
     def run argv
       selected_command = nil
+      options = []
       argv.each do |arg|
         # TODO options parsing?
+        options.push argv.shift
         unless arg.start_with? '-'
+          options.pop
           selected_command = @registry[arg.to_sym]
           break
         end
       end
 
       selected_command ||= @registry[@default_command] unless @default_command == nil
-      selected_command.run(argv) if selected_command != nil
+      selected_command.run(argv, options) if selected_command != nil
     end
   end
 end
