@@ -41,10 +41,7 @@ class SanUltari::CommandWrapper
   def run args = nil, options = nil
     args ||= []
     options ||= []
-    trim_index = args.index(@name.to_s)
-    trim_index ||= -1
-    trim_index += 1
-    args = args[trim_index..-1]
+
     unless args.length >= @required_param_count
       # TODO: standard output change
       puts "this command has #{@required_param_count} parameters at least"
@@ -52,8 +49,31 @@ class SanUltari::CommandWrapper
     end
 
     runner = @clazz.new
-
     # TODO options parsing
+    options, param_configs = set_values runner, args, options
+    set_defaults runner, param_configs
+    runner.public_send @name
+  end
+
+  private
+  def set_value object, name, value
+    object.public_send "#{name}=".to_sym, value
+  end
+
+  def set_defaults object, param_configs
+    param_configs.each do |param_config|
+      value = param_config.default
+
+      if param_config.require? && !value
+        puts "required parameter(#{param_config.name}) is missing"
+        return
+      end
+      set_value(object, param_config.name, value) unless value == nil
+      param_configs.shift
+    end
+  end
+
+  def set_values object, args, options
     param_configs = @params.clone
     args.each do |arg|
       if param_configs.empty?
@@ -69,22 +89,10 @@ class SanUltari::CommandWrapper
       end
 
       # set params
-      runner.public_send "#{current_param_config.name}=".to_sym, value
+      set_value object, current_param_config.name, value
       param_configs.shift
     end
 
-    param_configs.each do |param_config|
-      value = param_config.default
-
-      if param_config.require? && !value
-        puts "required parameter(#{param_config.name}) is missing"
-        return
-      end
-
-      runner.public_send "#{param_config.name}=".to_sym, value
-      param_configs.shift
-    end
-
-    runner.public_send @name
+    return options, param_configs
   end
 end
