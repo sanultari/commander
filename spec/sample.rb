@@ -39,3 +39,7 @@ class Runner
 end
 
 Runner.run ARGV
+
+
+# ruby sample.rb -v -h --help hello --test babo
+#  > Hello, babo
