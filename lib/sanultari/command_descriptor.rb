@@ -40,7 +40,7 @@ module SanUltari::CommandDescriptor
         # TODO options parsing?
         options.push argv.shift
         unless arg.start_with? '-'
-          options.pop
+          argv.shift
           selected_command = @registry[arg.to_sym]
           break
         end

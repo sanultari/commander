@@ -89,10 +89,16 @@ class SanUltari::CommandWrapper
       end
 
       # set params
-      set_value object, current_param_config.name, value
+      unless object.respond_to? "#{current_param_config.name}=".to_sym
+        puts "skip"
+        next
+      end
+      set_value object, current_param_config.name, arg
       param_configs.shift
     end
 
     return options, param_configs
   end
+
+  private :set_defaults, :set_value, :set_values
 end
