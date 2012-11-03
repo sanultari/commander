@@ -12,6 +12,9 @@ class SanUltari::CommandWrapper
     @options ||= {}
     @freeze = false
     @required_param_count = 0
+
+    # TODO : deprecate
+    @args = []
   end
 
   def add_param param_name, options
@@ -41,7 +44,6 @@ class SanUltari::CommandWrapper
   def run args = nil, options = nil
     args ||= []
     options ||= []
-
     unless args.length >= @required_param_count
       # TODO: standard output change
       puts "this command has #{@required_param_count} parameters at least"
@@ -52,12 +54,29 @@ class SanUltari::CommandWrapper
     # TODO options parsing
     options, param_configs = set_values runner, args, options
     set_defaults runner, param_configs
-    runner.public_send @name
+
+    if runner.public_method(@name).parameters.length > 0
+      runner.public_send @name, *@args
+    else
+      runner.public_send @name
+    end
   end
 
   private
   def set_value object, name, value
     object.public_send "#{name}=".to_sym, value
+  end
+
+  def handle_args param_config, value
+    if param_config.order < 0
+      @args.push value
+    else
+      if @args[order] == nil
+        @args[order] = value
+      else
+        puts "this command is mis-configured. some arguments have same order."
+      end
+    end
   end
 
   def set_defaults object, param_configs
@@ -89,11 +108,14 @@ class SanUltari::CommandWrapper
       end
 
       # set params
-      unless object.respond_to? "#{current_param_config.name}=".to_sym
-        puts "skip"
-        next
+      if current_param_config.type == :parameter
+        handle_args current_param_config, arg
+      else
+        unless object.respond_to? "#{current_param_config.name}=".to_sym
+          next
+        end
+        set_value object, current_param_config.name, arg
       end
-      set_value object, current_param_config.name, arg
       param_configs.shift
     end
 

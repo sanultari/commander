@@ -24,6 +24,9 @@ module SanUltari::CommandDescriptor
     end
 
     def import clazz, operation = nil
+      command = operation.to_sym
+      wrapper = clazz.get command
+      @registry[command] = wrapper
     end
 
     def group group_name, clazz, operation = nil
@@ -33,16 +36,25 @@ module SanUltari::CommandDescriptor
       @default_command = command.to_sym
     end
 
+    def get command
+      @registry[command.to_sym]
+    end
+
+    def list
+
+    end
+
     def run argv
       selected_command = nil
       options = []
       argv.each do |arg|
         # TODO options parsing?
-        options.push argv.shift
-        unless arg.start_with? '-'
+        unless arg.start_with? '-' || @registry.include?(arg.to_sym)
           argv.shift
           selected_command = @registry[arg.to_sym]
           break
+        else
+          options.push argv.shift
         end
       end
 

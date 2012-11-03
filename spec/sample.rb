@@ -10,7 +10,7 @@ end
 
 class Goodbye
   def bye name
-    puts "Goodbye"
+    puts "Goodbye #{name}"
   end
 end
 
