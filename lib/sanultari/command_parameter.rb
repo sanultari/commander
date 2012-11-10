@@ -7,7 +7,7 @@ class SanUltari::CommandParameter
       @type = options[:type]
       @type ||= :accessor
       @require = options[:require]
-      @require ||= true
+      @require = true if options[:require] == nil
       if @type == :parameter
         @order = options[:order]
         @order ||= -1
