@@ -56,7 +56,7 @@ class SanUltari::CommandWrapper
     set_defaults runner, param_configs
 
     if runner.public_method(@name).parameters.length > 0
-      puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length != @args.length
+      puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length < @args.length
       runner.public_send @name, *@args
     else
       runner.public_send @name
