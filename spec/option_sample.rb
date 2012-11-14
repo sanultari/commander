@@ -35,10 +35,17 @@ end
 class AnotherRunner
   include SanUltari::CommandDescriptor
 
-  @options = [:a, :all, :l, :u]
+  option_manager = SanUltari::CommandOptionManager.new
+
+  option_manager.add_option SanUltari::CommandOption.new :all, :a
+  option_manager.add_option SanUltari::CommandOption.new :l
+  option_manager.add_option SanUltari::CommandOption.new :u, nil, :String, ""
+
+
+
 
   #, desc: 'goodbye command'
-  map :bye, Goodbye, @options
+  map :bye, Goodbye, option_manager
   param :bye, :name, type: :parameter
 
   map :bye2, Goodbye
