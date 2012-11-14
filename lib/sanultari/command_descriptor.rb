@@ -1,4 +1,5 @@
 require 'sanultari/command_wrapper'
+require 'sanultari/command_option'
 
 module SanUltari::CommandDescriptor
   def self.included target
@@ -64,8 +65,16 @@ module SanUltari::CommandDescriptor
       argv.each do |arg|
         if arg.start_with? '-'
           value = argument_list.shift
-          args.push value
-          options.push value
+
+          if arg.start_with? '--'
+            value = value.delete '-'
+            options.push value
+          else
+            value = value.delete '-'
+            value.each_char do |item|
+              options.push item
+            end
+          end
           next
         end
 
@@ -77,15 +86,8 @@ module SanUltari::CommandDescriptor
         selected_command = @registry[argument_list.shift.to_sym]
       end
 
-      args += argument_list
-      if selected_command == nil
-        options.clear
-      else
-        args -= options
-      end
-
       selected_command ||= @registry[@default_command] unless @default_command == nil
-      selected_command.run(args, options) if selected_command != nil
+      selected_command.run(args, options)
     end
   end
 end
