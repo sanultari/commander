@@ -1,5 +1,4 @@
 require 'sanultari/command_wrapper'
-require 'sanultari/command_option'
 
 module SanUltari::CommandDescriptor
   def self.included target
