@@ -1,4 +1,7 @@
 require 'sanultari/command_wrapper'
+require 'sanultari/option_parse'
+require 'sanultari/option'
+
 
 module SanUltari::CommandDescriptor
   def self.included target
@@ -7,6 +10,7 @@ module SanUltari::CommandDescriptor
 
   module ClassMethods
     @registry = {}
+    @global_option_parse = nil
 
     def map command, clazz, options = nil
       @registry ||= {}
@@ -21,6 +25,19 @@ module SanUltari::CommandDescriptor
     end
 
     def option command, option, options = nil
+
+      if command == :global
+        @global_option_parse = SanUltari::OptionParse.new if @global_option_parse == nil
+        @global_option_parse.add_option option, options
+        return
+      end
+
+      selected_command = @registry[command.to_sym]
+
+      if selected_command != nil
+        selected_command.option_parse.add_option option, options
+      end
+
     end
 
     def import clazz, operation = nil
@@ -29,6 +46,14 @@ module SanUltari::CommandDescriptor
       unless targets.kind_of? Array
         targets = [targets]
       end
+
+      if @global_option_parse == nil
+        @global_option_parse = clazz.available_global_option_parse
+      else
+        @global_option_parse.import clazz.available_global_option_parse
+      end
+
+
 
       targets.each do |cmd|
         command = cmd.to_sym
@@ -51,6 +76,11 @@ module SanUltari::CommandDescriptor
     def available_commands
       @registry.keys
     end
+
+    def available_global_option_parse
+      @global_option_parse
+    end
+
 
     def list
 

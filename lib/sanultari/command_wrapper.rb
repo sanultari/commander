@@ -1,7 +1,7 @@
 require 'sanultari/command_parameter'
 
 class SanUltari::CommandWrapper
-  attr_reader :clazz, :params, :options
+  attr_reader :clazz, :params, :options, :option_parse
 
   def initialize name, clazz, params = nil, options = nil
     @name = name
@@ -10,6 +10,7 @@ class SanUltari::CommandWrapper
     @params ||= []
     @options = options
     @options ||= {}
+    @option_parse = SanUltari::OptionParse.new
     @freeze = false
     @required_param_count = 0
 
