@@ -35,18 +35,15 @@ end
 class AnotherRunner
   include SanUltari::CommandDescriptor
 
-  option_manager = SanUltari::CommandOptionManager.new
-
-  option_manager.add_option SanUltari::CommandOption.new :all, :a
-  option_manager.add_option SanUltari::CommandOption.new :l
-  option_manager.add_option SanUltari::CommandOption.new :u, nil, :String, ""
-
-
-
-
   #, desc: 'goodbye command'
-  map :bye, Goodbye, option_manager
+  map :bye, Goodbye
   param :bye, :name, type: :parameter
+
+  # default require value is false
+  # default type is boolean
+  option :bye, :name, abbr: :n, type: :string, require: true
+  # propagate all sub commands and sub modules
+  option :global, :verbose, abbr: :v
 
   map :bye2, Goodbye
 end
