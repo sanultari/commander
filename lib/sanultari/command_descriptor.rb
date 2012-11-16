@@ -26,18 +26,16 @@ module SanUltari::CommandDescriptor
 
     def option command, option, options = nil
 
-      if command == :global
-        @global_option_parse = SanUltari::OptionParse.new if @global_option_parse == nil
-        @global_option_parse.add_option option, options
-        return
-      end
-
       selected_command = @registry[command.to_sym]
-
       if selected_command != nil
         selected_command.option_parse.add_option option, options
       end
 
+    end
+
+    def global_option option, options = nil
+      @global_option_parse = SanUltari::OptionParse.new if @global_option_parse == nil
+      @global_option_parse.add_option option, options
     end
 
     def import clazz, operation = nil
@@ -52,8 +50,6 @@ module SanUltari::CommandDescriptor
       else
         @global_option_parse.import clazz.available_global_option_parse
       end
-
-
 
       targets.each do |cmd|
         command = cmd.to_sym
@@ -88,6 +84,7 @@ module SanUltari::CommandDescriptor
 
     def run argv
       selected_command = nil
+      global_option = []
       options = []
       args = []
       argument_list = argv.clone
@@ -113,10 +110,35 @@ module SanUltari::CommandDescriptor
         end
 
         selected_command = @registry[argument_list.shift.to_sym]
+        if selected_command != nil
+          break
+        end
       end
 
       selected_command ||= @registry[@default_command] unless @default_command == nil
       selected_command.run(args, options)
+    end
+
+    def run2 argv
+      selected_command = nil
+      global_options = []
+      remain_argv = []
+
+
+      argv.each do |arg|
+        if @registry.include? arg.to_sym
+          selected_command = @registry[arg.to_sym]
+          index = argv.index arg
+          global_options = argv[0..index-1]
+          remain_argv = argv[index+1..-1]
+          break
+        end
+      end
+
+      selected_global_options = @global_option_parse.get_options global_options
+
+      selected_command ||= @registry[@default_command] unless @default_command == nil
+      selected_command.run2(remain_argv, selected_global_options)
     end
   end
 end

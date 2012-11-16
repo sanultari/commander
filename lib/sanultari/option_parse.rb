@@ -50,4 +50,44 @@ class SanUltari::OptionParse
   def get_option_by_abbr abbr
     @abbrs[abbr.to_sym]
   end
+
+  def get_option option_list, name
+    option_list[name.to_sym]
+  end
+
+  def get_options options
+    args = []
+    find_options = {}
+    option_list = options.clone
+    not_exist_options = []
+    options.each do |item|
+      value = option_list.shift
+      if item.start_with? '-'
+        if item.start_with? '--'
+          value = value[2..-1]
+          find_option :get_option_by_name, value, find_options, not_exist_options
+          next
+        end
+
+        value = value[1..-1]
+        value.each_char do |abbr|
+          find_option :get_option_by_abbr, abbr, find_options, not_exist_options
+        end
+      else
+        args.push value
+      end
+
+    end
+    find_options
+  end
+
+
+  def find_option name, value, find_options, not_exist_options
+    find_option = self.public_send name, value
+    if find_option != nil
+      find_options[find_option.name.to_sym] = find_option
+    else
+      not_exist_options.push value
+    end
+  end
 end

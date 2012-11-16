@@ -72,6 +72,34 @@ class SanUltari::CommandWrapper
     end
   end
 
+  def run2 argv = nil, global_options = nil
+    argv ||= []
+    global_options ||= []
+    args, option_names = parse_argv argv
+
+    options = self.option_parse.get_options
+
+
+
+  end
+
+  def parse_argv argv
+    args = []
+    option_names = []
+    argument_list = argv.clone
+    argv.each do |arg|
+      if arg.start_with? '-'
+        value = argument_list.shift
+        option_names.push value
+        next
+      end
+
+      args.push argument_list.shift
+    end
+    return args, option_names
+  end
+
+
   private
   def set_value object, name, value
     object.public_send "#{name}=".to_sym, value

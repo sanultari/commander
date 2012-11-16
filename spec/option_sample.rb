@@ -43,7 +43,8 @@ class AnotherRunner
   # default type is boolean
   option :bye, :name, abbr: :n, type: :string, require: true
   # propagate all sub commands and sub modules
-  option :global, :verbose, abbr: :v
+  global_option :verbose, abbr: :v
+  global_option :all, abbr: :a
 
   map :bye2, Goodbye
 end
@@ -64,7 +65,7 @@ class Runner
   group :say, AnotherRunner
 end
 
-Runner.run ARGV
+Runner.run2 ARGV
 
 
 # ruby sample.rb -v -h --help hello --test tim
