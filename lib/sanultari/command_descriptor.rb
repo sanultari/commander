@@ -135,7 +135,7 @@ module SanUltari::CommandDescriptor
         end
       end
 
-      selected_global_options = @global_option_parse.get_options global_options
+      selected_global_options, not_exist_options = @global_option_parse.parse global_options
 
       selected_command ||= @registry[@default_command] unless @default_command == nil
       selected_command.run2(remain_argv, selected_global_options)

@@ -8,6 +8,8 @@ class SanUltari::Option
       @type ||= :boolean
       @require = options[:require]
       @require = false if options[:require] == nil
+      @value = options[:value]
+      @value ||= false
     end
     @name = name
   end

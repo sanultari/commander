@@ -75,28 +75,52 @@ class SanUltari::CommandWrapper
   def run2 argv = nil, global_options = nil
     argv ||= []
     global_options ||= []
-    args, option_names = parse_argv argv
+    args = []
+    options = {}
 
-    options = self.option_parse.get_options
+
+    options, not_exist_options= @option_parse.parse argv
+
+    args = parse_args not_exist_options
 
 
+    unless args.length >= @required_param_count
+      # TODO: standard output change
+      puts "this command has #{@required_param_count} parameters at least"
+      return
+    end
+
+    runner = @clazz.new
+    # TODO options parsing
+    options, param_configs = set_values runner, args, options
+    set_defaults runner, param_configs
+
+    if runner.public_method(@name).parameters.length > 0
+      puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length < @args.length
+
+      if options.length > 0
+        runner.public_send @name, *@args, options
+      else
+        runner.public_send @name, *@args
+      end
+
+    else
+
+      runner.public_send @name
+
+    end
 
   end
 
-  def parse_argv argv
+  def parse_args argv
     args = []
-    option_names = []
-    argument_list = argv.clone
-    argv.each do |arg|
-      if arg.start_with? '-'
-        value = argument_list.shift
-        option_names.push value
+    argv.each do |item|
+      unless item.start_with? '-'
+        args.push item
         next
       end
-
-      args.push argument_list.shift
     end
-    return args, option_names
+    args
   end
 
 

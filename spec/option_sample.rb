@@ -15,7 +15,17 @@ class Goodbye
   def bye name, options = nil
     if options != nil && options.length > 0
       options.each do |option|
-        puts "Goodbye #{name} options = #{option}"
+        if option.class == SanUltari::Option
+
+          puts "Goodbye #{name} option name = #{option.name}"
+          if option.type != :string
+            puts "Goodbye #{name} options = #{option.value.to_s}"
+          else
+            puts "Goodbye #{name} options = #{option.value}"
+          end
+        else
+          puts "Goodbye #{name} option = #{option}"
+        end
       end
     else
       puts "Goodbye #{name}"
@@ -42,9 +52,15 @@ class AnotherRunner
   # default require value is false
   # default type is boolean
   option :bye, :name, abbr: :n, type: :string, require: true
+  option :bye, :all, abbr: :a
+  option :bye, :u, abbr: :u, type: :string
+  option :bye, :l, abbr: :l
+
   # propagate all sub commands and sub modules
   global_option :verbose, abbr: :v
   global_option :all, abbr: :a
+  option :bye, :u, abbr: :u, type: :string
+  option :bye, :l, abbr: :l
 
   map :bye2, Goodbye
 end
