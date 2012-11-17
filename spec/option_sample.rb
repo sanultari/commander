@@ -59,8 +59,8 @@ class AnotherRunner
   # propagate all sub commands and sub modules
   global_option :verbose, abbr: :v
   global_option :all, abbr: :a
-  option :bye, :u, abbr: :u, type: :string
-  option :bye, :l, abbr: :l
+  global_option :u, abbr: :u, type: :string
+  global_option :l, abbr: :l
 
   map :bye2, Goodbye
 end

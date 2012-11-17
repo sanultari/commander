@@ -57,6 +57,8 @@ class SanUltari::OptionParse
 
   def parse options
     find_options = {}
+    incomplete_options = {}
+
     option_list = options.clone
     not_exist_options = []
     options.each do |item|
@@ -64,16 +66,23 @@ class SanUltari::OptionParse
       if item.start_with? '-'
         if item.start_with? '--'
           option = value[2..-1]
-          find_option :get_option_by_name, option, find_options, not_exist_options, '--'
+          find_option :get_option_by_name, option, find_options, not_exist_options, '--', incomplete_options
           next
         end
 
         option = value[1..-1]
         option.each_char do |abbr|
-          find_option :get_option_by_abbr, abbr, find_options, not_exist_options, '-'
+          find_option :get_option_by_abbr, abbr, find_options, not_exist_options, '-', incomplete_options
         end
       else
-        not_exist_options.push value
+        if incomplete_options.length > 0
+          work_option_key_value = incomplete_options.shift
+          work_option_key_value[1].value = value
+
+          find_options[work_option_key_value[0]] = work_option_key_value[1]
+        else
+          not_exist_options.push value
+        end
       end
     end
 
@@ -81,10 +90,14 @@ class SanUltari::OptionParse
   end
 
 
-  def find_option name, value, find_options, not_exist_options, option_header
+  def find_option name, value, find_options, not_exist_options, option_header, incomplete_options
     find_option = self.public_send name, value
     if find_option != nil
-      find_options[find_option.name.to_sym] = find_option
+      if find_option.type == :boolean
+        find_options[find_option.name.to_sym] = find_option
+      else
+        incomplete_options[find_option.name.to_sym] = find_option
+      end
     else
       not_exist_options.push (option_header + value)
     end

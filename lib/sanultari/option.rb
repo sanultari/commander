@@ -1,5 +1,6 @@
 class SanUltari::Option
-  attr_reader :name, :abbr, :type, :require, :value
+  attr_accessor :value
+  attr_reader :name, :abbr, :type, :require
 
   def initialize name, options = nil
     if options
@@ -8,8 +9,9 @@ class SanUltari::Option
       @type ||= :boolean
       @require = options[:require]
       @require = false if options[:require] == nil
+
       @value = options[:value]
-      @value ||= false
+      @value ||= false if @type == :boolean
     end
     @name = name
   end
