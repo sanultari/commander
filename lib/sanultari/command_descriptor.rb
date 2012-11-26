@@ -110,9 +110,6 @@ module SanUltari::CommandDescriptor
         end
 
         selected_command = @registry[argument_list.shift.to_sym]
-        if selected_command != nil
-          break
-        end
       end
 
       selected_command ||= @registry[@default_command] unless @default_command == nil

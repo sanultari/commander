@@ -1,15 +1,18 @@
 require 'sanultari/command_parameter'
 
 class SanUltari::CommandWrapper
-  attr_reader :clazz, :params, :options, :option_parse
+  attr_reader :clazz, :params, :cmd_options, :option_parse
 
-  def initialize name, clazz, params = nil, options = nil
+  def initialize name, clazz, params = nil, cmd_options = nil
     @name = name
     @clazz = clazz
     @params = params
     @params ||= []
-    @options = options
-    @options ||= {}
+    @cmd_options  = cmd_options
+    @cmd_options ||= {}
+    @options = {}
+
+
     @option_parse = SanUltari::OptionParse.new
     @freeze = false
     @required_param_count = 0
@@ -18,8 +21,8 @@ class SanUltari::CommandWrapper
     @args = []
   end
 
-  def add_param param_name, options
-    param = SanUltari::CommandParameter.new(param_name, options)
+  def add_param param_name, param_options
+    param = SanUltari::CommandParameter.new(param_name, param_options)
     if param.require? && !param.default
       @required_param_count += 1
     end
@@ -58,17 +61,9 @@ class SanUltari::CommandWrapper
 
     if runner.public_method(@name).parameters.length > 0
       puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length < @args.length
-
-      if options.length > 0
-        runner.public_send @name, *@args, options
-      else
-        runner.public_send @name, *@args
-      end
-
+      runner.public_send @name, *@args
     else
-
       runner.public_send @name
-
     end
   end
 
