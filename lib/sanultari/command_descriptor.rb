@@ -1,5 +1,6 @@
 require 'sanultari/command_wrapper'
-require 'sanultari/option_parse'
+require 'sanultari/command_parser'
+require 'sanultari/option_dic'
 require 'sanultari/option'
 
 
@@ -10,7 +11,7 @@ module SanUltari::CommandDescriptor
 
   module ClassMethods
     @registry = {}
-    @global_option_parse = nil
+    @global_options = nil
 
     def map command, clazz, options = nil
       @registry ||= {}
@@ -24,18 +25,17 @@ module SanUltari::CommandDescriptor
       @registry[command.to_sym].add_param param, options
     end
 
-    def option command, option, options = nil
-
+    def option command, name, options = nil
       selected_command = @registry[command.to_sym]
       if selected_command != nil
-        selected_command.option_parse.add_option option, options
+        selected_command.options.add name, options
       end
 
     end
 
-    def global_option option, options = nil
-      @global_option_parse = SanUltari::OptionParse.new if @global_option_parse == nil
-      @global_option_parse.add_option option, options
+    def global_option name, options = nil
+      @global_options = SanUltari::OptionDic.new if @global_options == nil
+      @global_options.add name, options
     end
 
     def import clazz, operation = nil
@@ -82,60 +82,15 @@ module SanUltari::CommandDescriptor
 
     end
 
+
     def run argv
-      selected_command = nil
-      global_option = []
-      options = []
-      args = []
-      argument_list = argv.clone
-      argv.each do |arg|
-        if arg.start_with? '-'
-          value = argument_list.shift
-
-          if arg.start_with? '--'
-            value = value.delete '-'
-            options.push value
-          else
-            value = value.delete '-'
-            value.each_char do |item|
-              options.push item
-            end
-          end
-          next
-        end
-
-        unless @registry.include? arg.to_sym
-          args.push argument_list.shift
-          next
-        end
-
-        selected_command = @registry[argument_list.shift.to_sym]
-      end
-
-      selected_command ||= @registry[@default_command] unless @default_command == nil
-      selected_command.run(args, options)
+      tokenizer = SanUltari::CommandTokenizer.new argv
+      parser = SanUltari::CommandParser.new
+      select_command, global_options = parser.find_command tokenizer, @registry
+      remain_args = tokenizer.remain_tokens
+      select_command ||= @registry[@default_command] unless @default_command == nil
+      select_command.run(remain_args, global_options)
     end
 
-    def run2 argv
-      selected_command = nil
-      global_options = []
-      remain_argv = []
-
-
-      argv.each do |arg|
-        if @registry.include? arg.to_sym
-          selected_command = @registry[arg.to_sym]
-          index = argv.index arg
-          global_options = argv[0..index-1]
-          remain_argv = argv[index+1..-1]
-          break
-        end
-      end
-
-      selected_global_options, not_exist_options = @global_option_parse.parse global_options
-
-      selected_command ||= @registry[@default_command] unless @default_command == nil
-      selected_command.run2(remain_argv, selected_global_options)
-    end
   end
 end
