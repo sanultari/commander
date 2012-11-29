@@ -21,11 +21,11 @@ class SanUltari::OptionDic
 
 
   def name_include? name
-    @options.include? name
+    @options.include? name.to_sym
   end
 
   def abbr_include? abbr
-    @abbrs.include? abbr
+    @abbrs.include? abbr.to_sym
   end
 
 
