@@ -6,7 +6,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 class Hello
   attr_accessor :name
 
-  def hello
+  def hello options = nil
     puts "Hello, #{self.name}"
   end
 end
@@ -16,15 +16,14 @@ class Goodbye
     if options != nil && options.length > 0
       options.each do |option|
         if option.class == SanUltari::Option
-
           puts "Goodbye #{name} option name = #{option.name}"
           if option.type != :string
-            puts "Goodbye #{name} options = #{option.value.to_s}"
+            puts "Goodbye #{name} options value = #{option.value.to_s}"
           else
-            puts "Goodbye #{name} options = #{option.value}"
+            puts "Goodbye #{name} options value = #{option.value}"
           end
         else
-          puts "Goodbye #{name} option = #{option}"
+          puts "Goodbye #{name} not work option = #{option}"
         end
       end
     else
@@ -74,6 +73,7 @@ class Runner
   desc :hello, 'hello'
   # type: :attribute is default
   param :hello, :name, require: true, default: 'World', type: :accessor
+  global_option :all, abbr: :a
   # second parameter is optional. second parameter can remove for importing all commands
   import AnotherRunner
   # another importing method. imported commands has group. commands having same name can be distinguish
@@ -81,7 +81,7 @@ class Runner
   group :say, AnotherRunner
 end
 
-Runner.run2 ARGV
+Runner.run ARGV
 
 
 # ruby sample.rb -v -h --help hello --test tim
