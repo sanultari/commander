@@ -19,7 +19,6 @@ class SanUltari::OptionDic
     end
   end
 
-
   def name_include? name
     @options.include? name.to_sym
   end
@@ -28,6 +27,10 @@ class SanUltari::OptionDic
     @abbrs.include? abbr.to_sym
   end
 
+  def merge another_option_dic
+    abbr_merge another_option_dic
+    name_merge another_option_dic
+  end
 
 
   private
@@ -41,6 +44,26 @@ class SanUltari::OptionDic
       puts "Option abbr duplicate. abbr value = #{option.abbr}."
     else
       @abbrs[option.abbr.to_sym] = option
+    end
+  end
+
+  def name_merge another_option_dic
+    another_option_dic.options.each_pair do |name, option|
+      if @options.include? name
+        puts "option merge.. Option name duplicate. option name = #{name}. replace option."
+      end
+      @options[name] = option
+    end
+  end
+
+  def abbr_merge another_option_dic
+    another_option_dic.abbrs.each_pair do |abbr, option|
+      if @abbrs.include? abbr
+        puts "option merge.. Option abbr duplicate. abbr = #{abbr}. replace option."
+        replace_option = @abbrs[abbr]
+        @options.delete replace_option.name
+      end
+      @abbrs[abbr] = option
     end
   end
 

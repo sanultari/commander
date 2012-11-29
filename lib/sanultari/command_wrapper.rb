@@ -1,7 +1,9 @@
 require 'sanultari/command_parameter'
+require 'sanultari/command_tokenizer'
+require 'sanultari/command_parser'
 
 class SanUltari::CommandWrapper
-  attr_reader :clazz, :params, :cmd_options, :option_parse
+  attr_reader :clazz, :params, :cmd_options, :work_options
 
   def initialize name, clazz, params = nil, cmd_options = nil
     @name = name
@@ -10,10 +12,7 @@ class SanUltari::CommandWrapper
     @params ||= []
     @cmd_options  = cmd_options
     @cmd_options ||= {}
-    @options = {}
-
-
-    @option_parse = SanUltari::OptionParse.new
+    @work_options = SanUltari::OptionDic.new
     @freeze = false
     @required_param_count = 0
 
@@ -45,39 +44,17 @@ class SanUltari::CommandWrapper
     @freeze = true
   end
 
-  def run args = nil, options = nil
-    args ||= []
+  def run argv = nil, upper_options = nil
     options ||= []
-    unless args.length >= @required_param_count
-      # TODO: standard output change
-      puts "this command has #{@required_param_count} parameters at least"
-      return
-    end
 
-    runner = @clazz.new
-    # TODO options parsing
-    options, param_configs = set_values runner, args, options
-    set_defaults runner, param_configs
+    parser = SanUltari::CommandParser.new
+    work_options, remain_tokens = parser.get_work_options argv, @work_options
 
-    if runner.public_method(@name).parameters.length > 0
-      puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length < @args.length
-      runner.public_send @name, *@args
-    else
-      runner.public_send @name
-    end
-  end
+    options += upper_options
+    options += work_options
 
-  def run2 argv = nil, global_options = nil
-    argv ||= []
-    global_options ||= []
-    args = []
-    options = {}
-
-
-    options, not_exist_options= @option_parse.parse argv
-
-    args = parse_args not_exist_options
-
+    args = parser.get_args remain_tokens
+    args ||= []
 
     unless args.length >= @required_param_count
       # TODO: standard output change
@@ -92,32 +69,11 @@ class SanUltari::CommandWrapper
 
     if runner.public_method(@name).parameters.length > 0
       puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length < @args.length
-
-      if options.length > 0
-        runner.public_send @name, *@args, options
-      else
-        runner.public_send @name, *@args
-      end
-
+      runner.public_send @name, *@args, options
     else
-
-      runner.public_send @name
-
+      runner.public_send @name, options
     end
-
   end
-
-  def parse_args argv
-    args = []
-    argv.each do |item|
-      unless item.start_with? '-'
-        args.push item
-        next
-      end
-    end
-    args
-  end
-
 
   private
   def set_value object, name, value

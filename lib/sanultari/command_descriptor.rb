@@ -1,7 +1,6 @@
 require 'sanultari/command_wrapper'
 require 'sanultari/command_parser'
 require 'sanultari/option_dic'
-require 'sanultari/option'
 
 
 module SanUltari::CommandDescriptor
@@ -28,7 +27,7 @@ module SanUltari::CommandDescriptor
     def option command, name, options = nil
       selected_command = @registry[command.to_sym]
       if selected_command != nil
-        selected_command.options.add name, options
+        selected_command.work_options.add name, options
       end
 
     end
@@ -45,10 +44,10 @@ module SanUltari::CommandDescriptor
         targets = [targets]
       end
 
-      if @global_option_parse == nil
-        @global_option_parse = clazz.available_global_option_parse
+      if @global_options == nil
+        @global_options = clazz.available_global_options
       else
-        @global_option_parse.import clazz.available_global_option_parse
+        @global_options.merge clazz.available_global_options
       end
 
       targets.each do |cmd|
@@ -73,24 +72,23 @@ module SanUltari::CommandDescriptor
       @registry.keys
     end
 
-    def available_global_option_parse
-      @global_option_parse
+    def available_global_options
+      @global_options
     end
-
 
     def list
 
     end
 
-
     def run argv
       tokenizer = SanUltari::CommandTokenizer.new argv
       parser = SanUltari::CommandParser.new
-      select_command, global_options = parser.find_command tokenizer, @registry
-      remain_args = tokenizer.remain_tokens
+      select_command, global_option_candidates = parser.find_command tokenizer, @registry
+      global_options, remain_tokens = parser.get_work_options global_option_candidates, @global_options
+
+      remain_args = remain_tokens + tokenizer.remain_tokens
       select_command ||= @registry[@default_command] unless @default_command == nil
       select_command.run(remain_args, global_options)
     end
-
   end
 end
