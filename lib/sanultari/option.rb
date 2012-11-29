@@ -11,7 +11,7 @@ class SanUltari::Option
       @require = false if options[:require] == nil
 
       @value = options[:value]
-      @value ||= false if @type == :boolean
+      @value ||= true if @type == :boolean
     end
     @name = name
   end
