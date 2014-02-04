@@ -1,15 +1,18 @@
 require 'sanultari/command_parameter'
+require 'sanultari/command_tokenizer'
+require 'sanultari/command_parser'
 
 class SanUltari::CommandWrapper
-  attr_reader :clazz, :params, :options
+  attr_reader :clazz, :params, :cmd_options, :work_options
 
-  def initialize name, clazz, params = nil, options = nil
+  def initialize name, clazz, params = nil, cmd_options = nil
     @name = name
     @clazz = clazz
     @params = params
     @params ||= []
-    @options = options
-    @options ||= {}
+    @cmd_options  = cmd_options
+    @cmd_options ||= {}
+    @work_options = SanUltari::OptionDic.new
     @freeze = false
     @required_param_count = 0
 
@@ -17,8 +20,8 @@ class SanUltari::CommandWrapper
     @args = []
   end
 
-  def add_param param_name, options
-    param = SanUltari::CommandParameter.new(param_name, options)
+  def add_param param_name, param_options
+    param = SanUltari::CommandParameter.new(param_name, param_options)
     if param.require? && !param.default
       @required_param_count += 1
     end
@@ -41,9 +44,18 @@ class SanUltari::CommandWrapper
     @freeze = true
   end
 
-  def run args = nil, options = nil
-    args ||= []
+  def run argv = nil, upper_options = nil
     options ||= []
+
+    parser = SanUltari::CommandParser.new
+    work_options, remain_tokens = parser.get_work_options argv, @work_options
+
+    options += upper_options
+    options += work_options
+
+    args = parser.get_args remain_tokens
+    args ||= []
+
     unless args.length >= @required_param_count
       # TODO: standard output change
       puts "this command has #{@required_param_count} parameters at least"
@@ -57,9 +69,9 @@ class SanUltari::CommandWrapper
 
     if runner.public_method(@name).parameters.length > 0
       puts "this command is misconfigured for method arguments" if runner.public_method(@name).parameters.length < @args.length
-      runner.public_send @name, *@args
+      runner.public_send @name, *@args, options
     else
-      runner.public_send @name
+      runner.public_send @name, options
     end
   end
 

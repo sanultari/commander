@@ -4,17 +4,17 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 class Hello
   attr_accessor :name
 
-  def hello
+  def hello options = nil
     puts "Hello, #{self.name}"
   end
 end
 
 class Goodbye
-  def bye name
+  def bye name, options = nil
     puts "Goodbye #{name}"
   end
 
-  def bye2
+  def bye2 options = nil
     puts "잘가라"
   end
 end

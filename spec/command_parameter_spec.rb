@@ -1,6 +1,3 @@
-# coding: utf-8
-
-require "rspec"
 require "spec_helper"
 
 describe "Parameter Initialize" do
